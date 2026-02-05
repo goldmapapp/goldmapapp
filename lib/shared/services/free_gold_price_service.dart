@@ -36,6 +36,7 @@ class FreeGoldPriceResponse {
 
 class FreeGoldPriceService {
   static const String _baseUrl = 'https://freegoldprice.org';
+  static const String _stooqBaseUrl = 'https://stooq.com';
 
   /// Prefer moving to env (e.g. --dart-define=FREEGOLDPRICE_API_KEY=...) for production.
   static const String _apiKey = '4x6Jg9Kfz1MqhMGXuFd4nGPmrLoWg0SguL1q5Nnu9ru1oDbdy8rHxqHxNfLF';
@@ -45,6 +46,14 @@ class FreeGoldPriceService {
       baseUrl: _baseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
+    ),
+  );
+
+  final Dio _historyDio = Dio(
+    BaseOptions(
+      baseUrl: _stooqBaseUrl,
+      connectTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 20),
     ),
   );
 
@@ -103,6 +112,85 @@ class FreeGoldPriceService {
     if (value is num) return value.toDouble();
     if (value is String) return double.tryParse(value) ?? 0;
     return 0;
+  }
+
+  /// Real historical prices from Stooq, filtered to selected range.
+  ///
+  /// FreeGoldPrice's public API docs expose current prices, but not timeseries.
+  /// For charting ranges (1D..5Y), we fetch a long USD series and slice it.
+  Future<List<PriceDataPoint>> getHistoricalPrices({
+    required MetalType metal,
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    if (!end.isAfter(start)) return const [];
+
+    final symbol = metal == MetalType.gold ? 'xauusd' : 'xagusd';
+    final response = await _historyDio.get<String>(
+      '/q/d/l/',
+      queryParameters: {'s': symbol, 'i': 'd'},
+      options: Options(responseType: ResponseType.plain),
+    );
+
+    if (response.statusCode != 200 || response.data == null || response.data!.isEmpty) {
+      throw Exception('Unable to load historical data');
+    }
+
+    final parsed = _parseStooqCsv(response.data!, start, end);
+    return _downsample(parsed, _targetPointsForRange(start, end));
+  }
+
+  List<PriceDataPoint> _parseStooqCsv(String csv, DateTime start, DateTime end) {
+    final lines = csv.split('\n');
+    if (lines.length < 2) return const [];
+
+    final points = <PriceDataPoint>[];
+    for (final line in lines.skip(1)) {
+      final row = line.trim();
+      if (row.isEmpty) continue;
+      final columns = row.split(',');
+      if (columns.length < 5) continue;
+
+      final timestamp = DateTime.tryParse(columns[0]);
+      final close = double.tryParse(columns[4]);
+      if (timestamp == null || close == null || !close.isFinite || close <= 0) {
+        continue;
+      }
+
+      if (timestamp.isBefore(start) || timestamp.isAfter(end)) {
+        continue;
+      }
+
+      points.add(PriceDataPoint(timestamp: timestamp, price: close));
+    }
+
+    points.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    return points;
+  }
+
+  int _targetPointsForRange(DateTime start, DateTime end) {
+    final totalHours = end.difference(start).inHours;
+    if (totalHours <= 24) return 96;
+    if (totalHours <= 168) return 168;
+    if (totalHours <= 720) return 120;
+    if (totalHours <= 2160) return 180;
+    if (totalHours <= 8760) return 365;
+    return 260;
+  }
+
+  List<PriceDataPoint> _downsample(List<PriceDataPoint> points, int maxPoints) {
+    if (points.length <= maxPoints || maxPoints < 2) return points;
+
+    final result = <PriceDataPoint>[points.first];
+    final step = (points.length - 1) / (maxPoints - 1);
+
+    for (var i = 1; i < maxPoints - 1; i++) {
+      final index = (i * step).round();
+      result.add(points[index.clamp(1, points.length - 2)]);
+    }
+
+    result.add(points.last);
+    return result;
   }
 
   /// Build chart series from current price only (no history API). Smooth placeholder.
