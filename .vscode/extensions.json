@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "dart-code.dart-code",
+    "dart-code.flutter",
+    "alexisvt.flutter-snippets",
+    "usernamehw.errorlens",
+    "naumovs.color-highlight",
+    "pflannery.vscode-versionlens",
+    "quicktype.quicktype",
+    "robert-brunhage.flutter-riverpod-snippets",
+    "nash.awesome-flutter-snippets",
+    "felixangelov.bloc",
+    "github.copilot",
+    "eamodio.gitlens"
+  ]
+}

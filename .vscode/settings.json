@@ -1,0 +1,78 @@
+{
+  // Flutter & Dart Settings
+  "dart.flutterSdkPath": "C:\\FlutterDEV\\flutter",
+  "dart.lineLength": 120,
+  "dart.previewFlutterUiGuides": true,
+  "dart.previewFlutterUiGuidesCustomTracking": true,
+  "dart.debugExternalPackageLibraries": true,
+  "dart.debugSdkLibraries": false,
+  "dart.completeFunctionCalls": true,
+  "dart.enableServerSnippets": true,
+  "dart.updateImportsOnRename": true,
+  "dart.renameFilesWithClasses": "always",
+
+  // Code Generation
+  "dart.runPubGetOnPubspecChanges": "always",
+
+  // Editor Settings
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.rulers": [120],
+    "editor.selectionHighlight": false,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.suggestSelection": "first",
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off",
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    }
+  },
+
+  // File Associations
+  "files.associations": {
+    "*.dart": "dart"
+  },
+
+  // Search & Files
+  "search.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/.fvm": true,
+    "**/build": true,
+    "**/.dart_tool": true,
+    "**/.flutter-plugins": true,
+    "**/.flutter-plugins-dependencies": true,
+    "**/.packages": true,
+    "**/pubspec.lock": true,
+    "**/*.freezed.dart": true,
+    "**/*.g.dart": true
+  },
+
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.hg/store/**": true,
+    "**/.fvm/**": true,
+    "**/build/**": true,
+    "**/.dart_tool/**": true
+  },
+
+  // Terminal
+  "terminal.integrated.env.windows": {
+    "PATH": "C:\\FlutterDEV\\flutter\\bin;${env:PATH}"
+  },
+
+  // Emmet
+  "emmet.includeLanguages": {
+    "dart": "html"
+  },
+
+  // Git
+  "git.ignoreLimitWarning": true
+}

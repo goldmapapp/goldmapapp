@@ -1,0 +1,52 @@
+targets:
+  $default:
+    builders:
+      freezed:
+        enabled: true
+        generate_for:
+          - lib/**/*.dart
+          - test/**/*.dart
+
+      json_serializable:
+        enabled: true
+        generate_for:
+          - lib/**/*.dart
+          - test/**/*.dart
+
+      riverpod_generator:
+        enabled: true
+        generate_for:
+          - lib/**/*.dart
+
+      injectable_generator:injectable:
+        enabled: true
+        generate_for:
+          - lib/core/di/injection.dart
+
+# Global options
+global_options:
+  freezed:
+    options:
+      # Generate copyWith method
+      copy_with: true
+      # Generate == and hashCode
+      equal: true
+      # Generate toString
+      to_string: true
+      # Make generated files ignore lint rules
+      default_union_constructor: true
+
+  json_serializable:
+    options:
+      any_map: false
+      checked: true
+      create_to_json: true
+      disallow_unrecognized_keys: false
+      explicit_to_json: true
+      field_rename: snake
+      include_if_null: false
+
+  riverpod_generator:
+    options:
+      # Automatically dispose providers
+      scoped: false
