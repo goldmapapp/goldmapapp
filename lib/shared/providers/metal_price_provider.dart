@@ -56,22 +56,28 @@ final currentPriceProvider = Provider<AsyncValue<MetalPrice>>((ref) {
   );
 });
 
-/// Historical chart data. Derived from cache + timeframe; no refetch when switching tabs or timeframes.
-final historicalDataProvider = Provider<AsyncValue<List<PriceDataPoint>>>((ref) {
+/// Historical chart data.
+///
+/// Tries real timeseries first; falls back to generated placeholder when unavailable.
+final historicalDataProvider = FutureProvider<List<PriceDataPoint>>((ref) async {
   final cache = ref.watch(pricesCacheProvider);
   final metal = ref.watch(selectedMetalProvider);
   final timeRange = ref.watch(selectedTimeRangeProvider);
+  final service = ref.read(metalPriceServiceProvider);
 
-  return cache.when(
-    data: (r) {
-      final price = metal == MetalType.gold ? r.goldMid : r.silverMid;
-      final start = DateTime.now().subtract(timeRange.duration);
-      final end = DateTime.now();
-      final service = ref.read(metalPriceServiceProvider);
-      final points = service.buildHistoricalPlaceholder(price, start, end);
-      return AsyncValue.data(points);
-    },
-    loading: () => const AsyncValue.loading(),
-    error: AsyncValue.error,
-  );
+  final r = await cache.future;
+  final price = metal == MetalType.gold ? r.goldMid : r.silverMid;
+  final start = DateTime.now().subtract(timeRange.duration);
+  final end = DateTime.now();
+
+  try {
+    final history = await service.getHistoricalPrices(metal: metal, start: start, end: end);
+    if (history.length >= 2) {
+      return history;
+    }
+  } catch (_) {
+    // Use placeholder fallback below.
+  }
+
+  return service.buildHistoricalPlaceholder(price, start, end);
 });
