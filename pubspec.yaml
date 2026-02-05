@@ -69,6 +69,12 @@ dependencies:
   shimmer: ^3.0.0
   graphic: ^2.3.0
 
+  # WebView for embedded charts (cross-platform)
+  webview_flutter: ^4.10.0      # Android/iOS
+  webview_flutter_platform_interface: ^2.10.0
+  webview_win_floating: ^3.0.2  # Windows desktop (floating webview)
+  url_launcher: ^6.3.1          # Fallback to open in browser
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -107,9 +113,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

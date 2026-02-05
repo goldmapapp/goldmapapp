@@ -13,7 +13,14 @@
       "WebFetch(domain:medium.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(flutter run:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(del \"c:\\\\Users\\\\omega\\\\Desktop\\\\GoldMapAPP\\\\goldmapapp\\\\lib\\\\shared\\\\widgets\\\\metal_price_chart.dart\")",
+      "Bash(flutter clean:*)",
+      "Bash(tasklist:*)",
+      "Bash(powershell -Command \"Stop-Process -Name goldmapapp -Force\":*)",
+      "Bash(powershell -Command:*)",
+      "WebFetch(domain:www.tradingview.com)",
+      "Bash(taskkill:*)"
     ]
   }
 }

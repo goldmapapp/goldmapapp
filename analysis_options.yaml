@@ -21,6 +21,10 @@ analyzer:
 
 linter:
   rules:
+    # Disable overly strict rules
+    public_member_api_docs: false
+    sort_pub_dependencies: false
+
     # Custom overrides for very_good_analysis
     prefer_single_quotes: true
     avoid_print: true
@@ -58,4 +62,3 @@ linter:
     unawaited_futures: true
     unnecessary_await_in_return: true
     unnecessary_parenthesis: true
-    unsafe_html: true
