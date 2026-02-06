@@ -6,12 +6,18 @@ project(runner LANGUAGES CXX)
 # work.
 #
 # Any new source files that you add to the application should be added here.
+if (DISABLE_FIREBASE_WINDOWS)
+  set(PLUGIN_REGISTRANT "generated_plugin_registrant_no_firebase.cc")
+else()
+  set(PLUGIN_REGISTRANT "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc")
+endif()
+
 add_executable(${BINARY_NAME} WIN32
   "flutter_window.cpp"
   "main.cpp"
   "utils.cpp"
   "win32_window.cpp"
-  "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
+  ${PLUGIN_REGISTRANT}
   "Runner.rc"
   "runner.exe.manifest"
 )
@@ -26,6 +32,7 @@ target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MAJOR=${FLUTT
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_MINOR=${FLUTTER_VERSION_MINOR}")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_PATCH=${FLUTTER_VERSION_PATCH}")
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=${FLUTTER_VERSION_BUILD}")
+target_compile_definitions(${BINARY_NAME} PRIVATE "DISABLE_FIREBASE_WINDOWS")
 
 # Disable Windows macros that collide with C++ standard library functions.
 target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")

@@ -2,6 +2,9 @@
 cmake_minimum_required(VERSION 3.14)
 project(goldmapapp LANGUAGES CXX)
 
+# Disable Firebase plugins on Windows dev builds by default.
+set(DISABLE_FIREBASE_WINDOWS ON)
+
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "goldmapapp")
@@ -55,7 +58,17 @@ add_subdirectory("runner")
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
-include(flutter/generated_plugins.cmake)
+if (DISABLE_FIREBASE_WINDOWS)
+  include(flutter/generated_plugins_no_firebase.cmake)
+else()
+  include(flutter/generated_plugins.cmake)
+endif()
+
+# Allow Windows dev builds without Firebase Auth warnings breaking the build.
+if(TARGET firebase_auth_plugin)
+  target_compile_options(firebase_auth_plugin PRIVATE /WX-)
+  target_compile_definitions(firebase_auth_plugin PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()
 
 
 # === Installation ===

@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -9,9 +11,18 @@ import 'package:goldmapapp/features/markets/markets_page.dart';
 import 'package:goldmapapp/features/settings/settings_page.dart';
 import 'package:goldmapapp/features/signup/signup_page.dart';
 import 'package:goldmapapp/features/trade/trade_page.dart';
+import 'package:goldmapapp/features/user_system/auth/presentation/screens/auth_gate.dart';
+import 'package:goldmapapp/firebase_options.dart';
 import 'package:goldmapapp/shared/providers/theme_provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final isWindows = !kIsWeb && defaultTargetPlatform == TargetPlatform.windows;
+  if (!isWindows) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
   runApp(
     const ProviderScope(
       child: GoldMapApp(),
@@ -44,7 +55,7 @@ class GoldMapApp extends ConsumerWidget {
                 secondary: Color(0xFF64FFDA),
               ),
       ),
-      home: const HomePage(),
+      home: const AuthGate(child: HomePage()),
     );
   }
 }
@@ -56,8 +67,7 @@ class HomePage extends ConsumerStatefulWidget {
   ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends ConsumerState<HomePage>
-    with TickerProviderStateMixin {
+class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMixin {
   int _selectedIndex = 0;
   late PageController _pageController;
   late AnimationController _desktopFlashController;
@@ -65,17 +75,16 @@ class _HomePageState extends ConsumerState<HomePage>
   bool _showDesktopMenu = false;
   bool _showDesktopBar = false;
   bool _wasWideScreen = false;
-  static const String _logoAssetPath =
-      'assets/images/north-america-unified-final.svg';
+  static const String _logoAssetPath = 'assets/images/north-america-unified-final.svg';
 
   // Pages loaded into the PageView
   final List<Widget> _pages = const [
-    MarketsPage(),    // 0 - Chart
-    MapPage(),        // 1 - Map
-    TradePage(),      // 2 - Buy/Sell
-    EventsPage(),     // 3 - Events
-    SignUpPage(),     // 4 - Sign Up
-    SettingsPage(),   // 5 - Settings (far right)
+    MarketsPage(), // 0 - Chart
+    MapPage(), // 1 - Map
+    TradePage(), // 2 - Buy/Sell
+    EventsPage(), // 3 - Events
+    SignUpPage(), // 4 - Sign Up
+    SettingsPage(), // 5 - Settings (far right)
   ];
 
   @override
@@ -130,9 +139,7 @@ class _HomePageState extends ConsumerState<HomePage>
       _showDesktopMenu = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _desktopFlashController
-              .forward(from: 0)
-              .then((_) => _desktopFlashController.reverse());
+          _desktopFlashController.forward(from: 0).then((_) => _desktopFlashController.reverse());
           setState(() {
             _showDesktopMenu = true;
           });
@@ -151,9 +158,7 @@ class _HomePageState extends ConsumerState<HomePage>
         child: Container(
           height: 70,
           decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.08)
-                : Colors.white.withValues(alpha: 0.35),
+            color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.35),
           ),
           child: Row(
             children: [
@@ -166,9 +171,7 @@ class _HomePageState extends ConsumerState<HomePage>
                       child: LayoutBuilder(
                         builder: (context, constraints) {
                           return TweenAnimationBuilder<double>(
-                            duration: _showDesktopMenu
-                                ? menuShowDuration
-                                : Duration.zero,
+                            duration: _showDesktopMenu ? menuShowDuration : Duration.zero,
                             curve: Curves.easeInOutCubic,
                             tween: Tween<double>(
                               begin: 0,
@@ -203,8 +206,7 @@ class _HomePageState extends ConsumerState<HomePage>
                             return Opacity(
                               opacity: opacity * 0.25,
                               child: Container(
-                                color: const Color(0xFFD4A84B)
-                                    .withValues(alpha: 0.35),
+                                color: const Color(0xFFD4A84B).withValues(alpha: 0.35),
                               ),
                             );
                           },
@@ -227,9 +229,7 @@ class _HomePageState extends ConsumerState<HomePage>
         child: Container(
           height: 70,
           decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.08)
-                : Colors.white.withValues(alpha: 0.35),
+            color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.35),
           ),
           child: Row(
             children: _buildSquareButtons(),
@@ -246,14 +246,12 @@ class _HomePageState extends ConsumerState<HomePage>
           height: 70,
           padding: const EdgeInsets.symmetric(horizontal: 24),
           decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.08)
-                : Colors.white.withValues(alpha: 0.35),
+            color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.35),
           ),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: _buildLogoContent(),
-            ),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: _buildLogoContent(),
+          ),
         ),
       ),
     );
@@ -334,10 +332,7 @@ class _HomePageState extends ConsumerState<HomePage>
   Widget _buildLogoContent() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxHeight = constraints.hasBoundedHeight &&
-                constraints.maxHeight.isFinite
-            ? constraints.maxHeight
-            : 70.0;
+        final maxHeight = constraints.hasBoundedHeight && constraints.maxHeight.isFinite ? constraints.maxHeight : 70.0;
         final logoSize = (maxHeight * 0.55).clamp(20.0, 40.0);
         final textSize = (maxHeight * 0.28).clamp(14.0, 22.0);
         final gapSize = (maxHeight * 0.12).clamp(6.0, 12.0);
@@ -407,8 +402,7 @@ class _HomePageState extends ConsumerState<HomePage>
                       opacity: opacity * 0.6,
                       child: Container(
                         width: 3,
-                        color: const Color(0xFFD4A84B)
-                            .withValues(alpha: 0.6),
+                        color: const Color(0xFFD4A84B).withValues(alpha: 0.6),
                       ),
                     ),
                   );
@@ -453,24 +447,18 @@ class _HomePageState extends ConsumerState<HomePage>
           child: Container(
             decoration: BoxDecoration(
               color: isSelected
-                  ? (isDark
-                      ? Colors.black.withValues(alpha: 0.15)
-                      : Colors.black.withValues(alpha: 0.05))
+                  ? (isDark ? Colors.black.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.05))
                   : Colors.transparent,
               border: Border(
                 left: !isFirst && isSelected
                     ? BorderSide(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.1)
-                            : Colors.black.withValues(alpha: 0.08),
+                        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.08),
                         width: 0.5,
                       )
                     : BorderSide.none,
                 right: !isLast && isSelected
                     ? BorderSide(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.1)
-                            : Colors.black.withValues(alpha: 0.08),
+                        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.08),
                         width: 0.5,
                       )
                     : BorderSide.none,

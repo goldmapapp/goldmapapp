@@ -1,10 +1,8 @@
 #
-# Generated file, do not edit.
+# Static plugin list for Windows when Firebase is disabled.
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  firebase_auth
-  firebase_core
   fullscreen_window
   url_launcher_windows
   webview_win_floating
