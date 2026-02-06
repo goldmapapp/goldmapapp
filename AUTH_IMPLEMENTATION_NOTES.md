@@ -30,6 +30,12 @@ Update after each major step so another agent can continue easily.
 - Registered Android, iOS, and Web apps
 - Added `android/app/google-services.json`
 
+### Milestone 4: Windows dev build (done)
+
+- Windows build runs with Firebase disabled
+- Custom plugin list and registrant prevent Firebase linking
+- `flutter clean` + `flutter pub get` + `flutter run -d windows` succeeded
+
 ## Setup Checklist (to be filled by user)
 
 - [ ] Firebase project created

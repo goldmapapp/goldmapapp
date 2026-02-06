@@ -8,9 +8,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:goldmapapp/features/events/events_page.dart';
 import 'package:goldmapapp/features/map/map_page.dart';
 import 'package:goldmapapp/features/markets/markets_page.dart';
+import 'package:goldmapapp/features/messages/messages_page.dart';
+import 'package:goldmapapp/features/profile/profile_page.dart';
 import 'package:goldmapapp/features/settings/settings_page.dart';
 import 'package:goldmapapp/features/signup/signup_page.dart';
 import 'package:goldmapapp/features/trade/trade_page.dart';
+import 'package:goldmapapp/features/user_system/auth/presentation/providers/auth_provider.dart';
 import 'package:goldmapapp/features/user_system/auth/presentation/screens/auth_gate.dart';
 import 'package:goldmapapp/firebase_options.dart';
 import 'package:goldmapapp/shared/providers/theme_provider.dart';
@@ -77,16 +80,6 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   bool _wasWideScreen = false;
   static const String _logoAssetPath = 'assets/images/north-america-unified-final.svg';
 
-  // Pages loaded into the PageView
-  final List<Widget> _pages = const [
-    MarketsPage(), // 0 - Chart
-    MapPage(), // 1 - Map
-    TradePage(), // 2 - Buy/Sell
-    EventsPage(), // 3 - Events
-    SignUpPage(), // 4 - Sign Up
-    SettingsPage(), // 5 - Settings (far right)
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -130,6 +123,9 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 800;
     final isDark = ref.watch(themeProvider);
+    final isWindows = !kIsWeb && defaultTargetPlatform == TargetPlatform.windows;
+    final authState = ref.watch(authStateChangesProvider);
+    final isAuthed = !isWindows && authState.asData?.value != null;
     const menuShowDuration = Duration(milliseconds: 650);
     final enteringDesktop = isWideScreen && !_wasWideScreen;
     final leavingDesktop = !isWideScreen && _wasWideScreen;
@@ -151,7 +147,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
       _showDesktopBar = false;
     }
     // Desktop navigation bar with logo
-    final menuButtons = _buildSquareButtons(showLabels: true);
+    final menuButtons = _buildSquareButtons(isAuthed: isAuthed, showLabels: true);
     final desktopNavBar = ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
@@ -232,7 +228,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
             color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.35),
           ),
           child: Row(
-            children: _buildSquareButtons(),
+            children: _buildSquareButtons(isAuthed: isAuthed),
           ),
         ),
       ),
@@ -286,7 +282,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                       controller: _pageController,
                       onPageChanged: _onPageChanged,
                       physics: const BouncingScrollPhysics(),
-                      children: _pages,
+                      children: _buildPages(isAuthed),
                     ),
                     // Mobile logo bar - only shown on mobile
                     if (!isWideScreen)
@@ -415,14 +411,22 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
     );
   }
 
-  List<Widget> _buildSquareButtons({bool showLabels = false}) {
+  List<Widget> _buildSquareButtons({required bool isAuthed, bool showLabels = false}) {
     final items = [
       {'icon': Icons.show_chart_rounded, 'label': 'Markets', 'index': 0},
       {'icon': Icons.map_rounded, 'label': 'Map', 'index': 1},
       {'icon': Icons.currency_exchange_rounded, 'label': 'Trade', 'index': 2},
       {'icon': Icons.event_rounded, 'label': 'Events', 'index': 3},
-      {'icon': Icons.person_add_rounded, 'label': 'Sign Up', 'index': 4},
-      {'icon': Icons.settings_rounded, 'label': 'Settings', 'index': 5},
+      {
+        'icon': isAuthed ? Icons.person_rounded : Icons.person_add_rounded,
+        'label': isAuthed ? 'Profile' : 'Sign Up',
+        'index': 4,
+      },
+      {
+        'icon': isAuthed ? Icons.chat_bubble_rounded : Icons.settings_rounded,
+        'label': isAuthed ? 'Messages' : 'Settings',
+        'index': 5,
+      },
     ];
     final isDark = ref.watch(themeProvider);
 
@@ -495,5 +499,16 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
         ),
       );
     }).toList();
+  }
+
+  List<Widget> _buildPages(bool isAuthed) {
+    return [
+      const MarketsPage(), // 0 - Chart
+      const MapPage(), // 1 - Map
+      const TradePage(), // 2 - Buy/Sell
+      const EventsPage(), // 3 - Events
+      if (isAuthed) const ProfilePage() else const SignUpPage(), // 4 - Profile / Sign Up
+      if (isAuthed) const MessagesPage() else const SettingsPage(), // 5 - Messages / Settings
+    ];
   }
 }
